@@ -1,0 +1,603 @@
+\ProvidesPackage{pghelpers}
+
+
+%%%% Fixed-width environment to format PG boilerplate %%%%
+\newenvironment{PGtext}{%
+\begin{alltt}
+\fontsize{9.2}{10.5}\ttfamily\selectfont}%
+{\end{alltt}}
+
+
+\newcounter{mytnote}
+\newcommand{\TNote}[1]{%
+  \refstepcounter{mytnote}%
+  \begin{minipage}{0.85\textwidth}
+    \small
+    \phantomsection
+    \pdfbookmark[0]{Transcriber's Note}{TransNote\themytnote}
+    \subsection*{\centering\normalfont\scshape%
+      \normalsize\MakeLowercase{\TransNote}}%
+
+    \raggedright
+    #1
+  \end{minipage}
+}
+
+\newcommand{\Corrections}{%
+  The diagrams have been re-created, using accompanying formulas or
+  descriptions from the text where possible.
+  \bigskip
+
+  In Chapter~XIV, pages \Pageref[]{erratum0}--\Pageref[]{erratum0a},
+  numerical values of $\left(1+\frac{1}{n}\right)^n$, $\epsilon^x$,
+  and related quantities of British currency have been verified and
+  rounded to the nearest digit.
+  \bigskip
+
+  On \Pageref[page]{erratum1} (page~146 in the original), the graphs
+  of the natural logarithm and exponential functions, Figures
+  38~and~39, have been interchanged to match the surrounding text.
+  \medskip
+
+  The vertical dashed lines in the natural logarithm graph, Figure~39
+  (Figure~38 in the original), have been moved to match the data in
+  the corresponding table.
+  \bigskip
+
+  On \Pageref[page]{erratum2} (page~167 in the original), the graphs
+  of the sine and cosine functions, Figures 44~and~45, have been
+  interchanged to match the surrounding text.
+}
+
+% Misc text formatting tricks
+\newlength{\TmpLen}
+\newlength{\MySkip}
+\newcommand{\PadTxt}[3][c]{%
+  \settowidth{\TmpLen}{#2}%
+  \makebox[\TmpLen][#1]{#3}%
+}
+
+\newcommand{\PadTo}[3][c]{\PadTxt[#1]{$#2$}{$#3$}}
+
+% Style-setting
+\renewcommand{\footnoterule}{}
+\newcommand{\loosen}{\spaceskip0.5em plus 0.5em minus 0.25em}
+\setlength{\emergencystretch}{1.5em}
+
+\renewcommand{\topfraction}{0.6}
+\renewcommand{\bottomfraction}{0.6}
+\renewcommand{\textfraction}{0.1}
+\DeclareMathSizes{12}{12}{8}{7}
+\newcommand{\ds}{\displaystyle}
+
+%% No hrule in page header
+\ifdefined\HCode\else
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\baselinestretch}{1.33}
+  
+  
+  % Running heads
+  \newcommand{\Heading}[1]{\textbf{\footnotesize\MakeUppercase{#1}}}
+  
+  \newcommand{\SetOddHead}[1]{%
+    \fancyhead{}%
+    \setlength{\headheight}{15pt}%
+    \fancyhead[CE]{\Heading{Calculus Made Easy}}%
+    \fancyhead[CO]{\Heading{#1}}%
+    \ifthenelse{\boolean{ForPrinting}}%
+               {\fancyhead[RO,LE]{\thepage}}%
+               {\fancyhead[R]{\thepage}}%
+  }
+  
+  \newcommand{\SetBothHeads}[1]{%
+    \fancyhead{}%
+    \fancyhead[C]{\Heading{#1}}%
+  }
+  
+  % Table of Contents
+  % Redefine headings for table of contents & index
+  \renewcommand{\contentsname}{%
+    \protect\Large\protect\normalfont\protect\centering%
+    CONTENTS.\\
+  }
+  
+  \newcommand{\ToCBox}[1]{%
+    \PadTxt[r]{XVIII.}{#1}\quad%
+  }
+\fi
+
+% Top-level footnote numbers restart on each page
+\MakePerPage{footnote}
+
+% Stretch-fit argument to a box as wide as \TmpLen
+\newcommand{\SetBox}[2][s]{%
+  \ifthenelse{\equal{#1}{s}}{%
+    \makebox[\TmpLen][#1]{\loosen #2}%
+  }{%
+    \makebox[\TmpLen][#1]{#2}%
+  }%
+}
+
+% For Table of Standard Forms
+\newcommand{\ColumnHead}[1]{%
+  \multicolumn{3}{|c|}{\textbf{#1}}
+}
+
+%% Macro for reducing space between adjacent display environments
+\newcommand{\CancelMathSkip}{\vspace{-\belowdisplayskip}}
+\newcommand{\BindMath}[1]{%
+{\vspace{\abovedisplayskip}%
+{\setlength{\abovedisplayskip}{0pt}%
+\setlength{\belowdisplayskip}{0pt}%
+#1}\vspace{\belowdisplayskip}}%
+}
+
+\newcommand{\ToCAnchor}{}
+
+%\ToCLine[font style]{Chapter}{Title}{label}
+\newcommand{\ToCLine}[4][\scshape]{%
+  \par\noindent\label{toc:#4}%
+  \ifthenelse{\not\equal{\pageref{toc:#4}}{\ToCAnchor}}{%
+    \noindent\textsc{\scriptsize Chapter\hfill Page}\medskip%
+    \renewcommand{\ToCAnchor}{\pageref{toc:#4}}\par%
+  }{}%
+  \settowidth{\TmpLen}{9999}%
+  \noindent\parbox[b]{\linewidth-\TmpLen}{\ToCBox{#2}%
+    \rule{0pt}{16pt}#1\hangindent6em #3\dotfill}% [** TN: Hard-coded spaces]
+  \PadTxt[r]{9999}{\pageref{#4}}\smallskip%
+}
+
+\newcommand{\ChapterSkip}{\vspace*{0.1\linewidth}}
+\newcommand{\flushpage}{\clearpage\fancyhf{}\cleardoublepage}
+
+% Numbered: \Chapter[Running Head]{number}{Title}
+\newcommand{\Chapter}[3][]{%
+  \flushpage
+  \phantomsection\label{chap:#2}\pdfbookmark[0]{Chapter #2}{Chapter #2}%
+  \ifthenelse{\not\equal{#1}{}}{%
+    \SetOddHead{#1}%
+  }{%
+    \SetOddHead{#3}%
+  }%
+
+  \addtocontents{toc}{\protect\ToCLine{#2.}{#3}{chap:#2}}
+  \thispagestyle{empty}
+  \ChapterSkip%
+  \section*{\centering\normalfont\Large CHAPTER #2.}
+  \subsection*{\centering\normalfont\large\MakeUppercase{#3}.}
+}
+
+
+% Unnumbered, but has a ToC entry: \AltChapter[Running Head]{Title}
+%[** TN: Uses the book's chapter structure to select ToC entry font]
+\newcommand{\AltChapter}[2][]{%
+  \ifthenelse{\equal{#2}{Prologue}}{%
+    \pagestyle{fancy}
+  }{}
+  \flushpage
+  \phantomsection\label{#2}\pdfbookmark[0]{#2}{#2}%
+  \ifthenelse{\not\equal{#1}{}}{%
+    \SetOddHead{#1}%
+    \addtocontents{toc}{\protect\ToCLine{}{#1}{#2}}%
+  }{%
+    \SetOddHead{#2}%
+    \ifthenelse{\equal{#2}{Table of Standard Forms}}{%
+      \addtocontents{toc}{\protect\ToCLine[\bfseries]{}{#2}{#2}}%
+    }{%
+      \addtocontents{toc}{\protect\ToCLine{}{#2}{#2}}%
+      \ChapterSkip%
+    }%
+  }%
+
+  \thispagestyle{empty}
+  \section*{\centering\normalfont\Large\MakeUppercase{#2.}}
+}
+
+
+% For the Preface and Epilogue; no ToC entry
+\newcommand\ChapterStar[2][]{%
+  \flushpage
+  \phantomsection
+
+  \ifthenelse{\not\equal{#1}{}}{%
+    \SetOddHead{#1}%
+    \pdfbookmark[0]{#1}{#1}%
+  }{%
+    \SetOddHead{#2}%
+    \pdfbookmark[0]{#2}{#2}%
+  }%
+  \thispagestyle{empty}
+  \ChapterSkip%
+  \section*{\centering\normalfont\Large\MakeUppercase{#2.}}
+}
+
+\newcounter{SectionNo}
+\setcounter{SectionNo}{0}
+
+\newcommand\Section[2][]{%
+  \section*{\centering\normalfont\normalsize\bfseries#2}%
+  \refstepcounter{SectionNo}%
+  \phantomsection\pdfbookmark[1]{#2}{#2}\label{section:\theSectionNo}%
+  \ifthenelse{\not\equal{#1}{}}{\SetOddHead{#1}}{}%
+}
+
+%tweaking \subsection - added italics & indent
+\newcommand\Subsection[1]{%
+  \medskip\pagebreak[1]\par\textit{#1}\pagebreak[0]\par%
+}
+
+%tweaking \paragraph - added italics & indent
+\newcommand{\Paragraph}[1]{\medskip\pagebreak[1]\par\textit{#1}}
+
+\newcommand{\Note}[1]{%
+  \clearpage
+  \section*{\centering\normalfont\normalsize #1}
+}
+
+% Dedicated structural macros
+\newcommand{\Case}[1]{\Subsection{Case~\upshape{#1}.}}
+
+% "Example." goes on its own line; otherwise, run-in heading
+\newcommand{\Example}[1]{%
+  \ifthenelse{\equal{#1}{.}}{%
+    \Subsection{\textit{Example.}}%
+  }{%
+    \Paragraph{\textit{Example}~\upshape{#1}}%
+  }%
+}
+
+\newcommand{\Examples}[1]{%
+  \ifthenelse{\equal{#1}{.}}{%
+    \Subsection{\textit{Examples.}}%
+  }{%
+    \Subsection{\textit{#1}}%
+  }
+}
+
+
+% Exercises section heading
+% \Exercises[Running Head]{I} (See p.~254 for Answers.)
+\newcommand{\Exercises}[2][]{%
+  \tb\textit{Exercises~#2.}\quad
+  \phantomsection\pdfbookmark[1]{Exercises #2}{Exercises #2}\label{Ex:#2}%
+  \ifthenelse{\not\equal{#1}{}}{\SetOddHead{#1}}{}%
+}
+
+% Loosen up page spacing
+%\setlength{\parsep}{1ex plus 0.5ex minus 1ex}
+%\setlength{\partopsep}{0.5ex plus 1.5ex minus 0.25ex}
+%\setlength{\itemsep}{1ex plus 1ex minus 1ex}
+
+\newboolean{InMulticols}% true iff we're in a multicolumn envt
+
+% List item formatting
+\newcommand{\ListInit}{%
+  \setlength{\leftmargin}{0pt}%
+  \setlength{\labelwidth}{\parindent}%
+  \setlength{\labelsep}{0.5em}%
+  \setlength{\itemsep}{0pt}%
+  \setlength{\listparindent}{\parindent}
+  \setlength{\itemindent}{2\parindent}%
+}
+
+\newcommand{\SublistInit}{%
+  \setlength{\leftmargin}{\parindent}%
+  \setlength{\rightmargin}{3em}%
+  \setlength{\labelwidth}{1em}%
+  \setlength{\labelsep}{0.5em}%
+  \setlength{\itemsep}{0pt}%
+  \setlength{\listparindent}{\parindent}
+  \setlength{\itemindent}{2.5em}%
+}
+
+
+% List environment initializer for Answers section
+\newcommand{\ListInitAns}{%
+  \setlength{\leftmargin}{\parindent}%0pt
+  \setlength{\labelwidth}{\parindent}%
+  \setlength{\labelsep}{0.5em}%
+  \setlength{\itemsep}{2pt}%
+  \setlength{\listparindent}{\parindent}
+  \setlength{\itemindent}{0pt}%
+}
+
+% Reset number of columns *within a Problems or Answers environment*
+\newcommand{\ResetCols}[1]{%
+  \ifthenelse{\boolean{InMulticols}}{%
+  \end{multicols}%
+}{}
+\ifthenelse{\equal{#1}{1}}{%
+  \setboolean{InMulticols}{false}%
+}{%
+  \setboolean{InMulticols}{true}%
+  \begin{multicols}{#1}[\raggedcolumns]%
+  }%
+}
+
+% #1 = number of columns
+\newenvironment{Problems}[1][1]{%
+  \begin{list}{}{\ListInit}%
+  \ifthenelse{\equal{#1}{1}}{%
+    \setboolean{InMulticols}{false}%
+  }{%
+    \setboolean{InMulticols}{true}%
+    \begin{multicols}{#1}
+    }%
+  }{% End of envt code
+    \ifthenelse{\boolean{InMulticols}}{%
+    \end{multicols}%
+  }{}%
+  \setboolean{InMulticols}{false}
+\end{list}%
+}
+
+\newenvironment{SubProbs}{%
+  \begin{list}{}{\SublistInit}%
+  }{%
+  \end{list}%
+}
+
+\newenvironment{Answers}[4][1]{%
+  \ifthenelse{\not\equal{#2}{I}}{\vspace{12pt plus 24pt minus 12pt}\tb#4}{}%
+%
+  \section*{\centering\normalsize Exercises~#2.\quad\normalfont#3\label{AnsEx:#2}}%
+  \begin{list}{}{\ListInitAns}%
+    \ifthenelse{\equal{#1}{1}}{%
+      \setboolean{InMulticols}{false}% Update state; else
+    }{%
+      \setboolean{InMulticols}{true}%
+      \begin{multicols}{#1}[\raggedcolumns]%
+      }%
+    }{% End of envt code
+      \ifthenelse{\boolean{InMulticols}}{\end{multicols}}{}%
+  \end{list}%
+  \setboolean{InMulticols}{false}%
+}
+
+% Exercise and answer numbers
+\newcommand\Item[2][]{%
+  \ifvmode\leavevmode\fi\item[#2]%
+   \ifthenelse{\not\equal{#1}{}}{\phantomsection\label{#1}}{}%
+}
+
+% Table entries
+\newcolumntype{.}[1]{D{.}{.}{#1}}
+
+\newcommand{\Td}[2][r]{%
+  \settowidth{\TmpLen}{9999}%
+  \ifthenelse{\equal{#1}{r}}{%
+    \makebox[\TmpLen][#1]{$#2$\;}%
+  }{%
+    \ifthenelse{\equal{#1}{l}}{%
+      \makebox[\TmpLen][#1]{\;$#2$}%
+    }{%
+      \makebox[\TmpLen][#1]{$#2$}%
+    }%
+  }%
+}
+
+% polynomial division on 051.png
+\newcommand\TmpColA{%
+  \begin{tabular}{@{}c|}$v + dv$\DStrut\\\hline\end{tabular}%
+}
+
+\newcommand\TmpColB{%
+  \;\begin{tabular}{@{}l@{}}$u + \dfrac{u  \cdot dv}{v}\DStrut$ \\\hline\end{tabular}%
+}
+
+% Catalogue macros
+\newcommand{\Catalogue}{%
+  \flushpage
+  \thispagestyle{empty}
+  \phantomsection\pdfbookmark[0]{Catalogue}{Catalogue}
+  \SetBothHeads{Catalogue}
+  \begin{center}
+    \large A SELECTION OF \\
+    % [** TN: Fake boldface smallcaps to avoid loading fontenc package]
+    \bfseries \Huge M\Large ATHEMATICAL \Huge W\Large ORKS
+    \tb
+  \end{center}
+}
+
+\newcommand{\License}{%
+  \flushpage
+  \thispagestyle{empty}
+  \phantomsection\pdfbookmark[0]{License}{License}
+  \SetBothHeads{License}
+}
+
+\newcommand{\Title}[1]{{\Large #1}}
+\newcommand{\Author}[1]{\textsc{#1}}
+
+\newcommand{\Book}[1]
+  {\smallskip\par\noindent\hangindent\parindent #1}
+
+
+% Illustrations
+\newcommand{\Graphic}[2][]{%
+  \ifthenelse{\equal{#1}{}}{%
+    \includegraphics{./images/#2.pdf}%
+  }{%
+    \includegraphics[width=#1]{./images/#2.pdf}%
+  }%
+}
+
+% Usage: \Figure[optional width]{File name}{Fig number}
+\newcommand{\Figure}[3][2.25in]{%
+  \begin{figure}[hbt]
+    \centering%
+    \Graphic[#1]{#2}%
+    \phantomsection\label{fig:#3}%
+  \end{figure}%
+}
+
+% For pairs of side-by-side images
+\newcommand{\Figures}[5][2.25in]{%
+  \begin{figure}[hbt]
+    \centering%
+    \makebox[0pt][c]{% Force centering even if sum of widths is large
+      \Graphic[#1]{#2}\qquad\Graphic[#1]{#3}%
+    }%
+    \phantomsection\label{fig:#4}\label{fig:#5}%
+  \end{figure}%
+}
+
+% Cross-referencing: anchors
+\newcommand{\DPPageSep}[2]{\Pagelabel{#2}}
+
+\newcommand{\Pagelabel}[1]
+  {\phantomsection\label{#1}}
+
+% and links
+\newcommand{\Pageref}[2][p.]{%
+  \ifthenelse{\not\equal{#1}{}}{%
+    \hyperref[#2]{#1~\pageref{#2}}%
+  }{%
+    \hyperref[#2]{\pageref{#2}}%
+  }%
+}
+
+\newcommand{\Pagerange}[2]{%
+  \ifthenelse{\equal{\pageref{#1}}{\pageref{#2}}}{%
+    \hyperref[#1]{p.~\pageref{#1}}%
+  }{%
+%[** TN: Formatting as pp. m--n instead of pp. n, n+1.]
+    pp.~\hyperref[#1]{\pageref{#1}}--\hyperref[#2]{\pageref{#2}}%
+  }%
+}
+
+\newcommand{\Fig}[1]{\hyperref[fig:#1]{Fig.~#1}}
+
+\newcommand{\Figs}[3]{%
+  Figs.\ \hyperref[fig:#1]{#1}~#2~\hyperref[fig:#3]{#3}}
+
+\newcommand{\NB}{\textit{N.B.}}
+\newcommand{\IE}{\textit{i.e.}}
+
+% Thought break
+\newcommand{\tb}[1][1.5in]{%
+%  \pagebreak[0]\begin{center}\rule{#1}{0.5pt}\end{center}\pagebreak[3]%
+  \pagebreak[0]\par{\centering\rule{#1}{0.5pt}\pagebreak[3]\par}%
+}
+
+
+\newcommand{\DPtypo}[2]{#2}% Corrections.
+\newcommand{\DPchg}[2]{#2}%  Stylistic tweaks
+\newcommand{\DPnote}[1]{}%   Notes to posterity
+
+\DeclareInputText{176}{\ifmmode{{}^\circ}\else\textdegree\fi}
+\DeclareInputText{183}{\ifmmode\cdot\else\textperiodcentered\fi}
+
+
+\newcommand{\Z}{\phantom{0}}
+\newcommand{\DStrut}{\rule[-12pt]{0pt}{32pt}}
+\newcommand{\Strut}{\rule{0pt}{16pt}}
+
+\newcommand{\First}[1]{\noindent\textsc{#1}}
+
+% "exponent fraction" factored out for special handling, if desired
+\newcommand{\efrac}[2]{\frac{#1}{#2}}
+
+\DeclareMathOperator{\Arccos}{arc\,cos}
+\renewcommand{\arccos}{\Arccos}
+
+\DeclareMathOperator{\Arcsin}{arc\,sin}
+\renewcommand{\arcsin}{\Arcsin}
+
+\DeclareMathOperator{\Arctan}{arc\,tan}
+\renewcommand{\arctan}{\Arctan}
+
+\DeclareMathOperator{\arcsec}{arc\,sec}
+\DeclareMathOperator{\cosec}{cosec}
+\DeclareMathOperator{\cotan}{cotan}
+\DeclareMathOperator{\sech}{sech}
+
+% DPalign
+\providecommand\shortintertext\intertext
+\newcount\DP@lign@no
+\newtoks\DP@lignb@dy
+\newif\ifDP@cr
+\newif\ifbr@ce
+\def\f@@zl@bar{\null}
+\def\addto@DPbody#1{\global\DP@lignb@dy\@xp{\the\DP@lignb@dy#1}}
+\def\parseb@dy#1{\ifx\f@@zl@bar#1\f@@zl@bar
+    \addto@DPbody{{}}\let\@next\parseb@dy
+  \else\ifx\end#1
+    \let\@next\process@DPb@dy
+    \ifDP@cr\else\addto@DPbody{\DPh@@kr&\DP@rint}\@xp\addto@DPbody\@xp{\@xp{\the\DP@lign@no}&}\fi
+    \addto@DPbody{\end}
+  \else\ifx\intertext#1
+    \def\@next{\eat@command0}%
+  \else\ifx\shortintertext#1
+    \def\@next{\eat@command1}%
+  \else\ifDP@cr\addto@DPbody{&\DP@lint}\@xp\addto@DPbody\@xp{\@xp{\the\DP@lign@no}&\DPh@@kl}
+          \DP@crfalse\fi
+    \ifx\begin#1\def\begin@stack{b}
+      \let\@next\eat@environment
+  \else\ifx\lintertext#1
+    \let\@next\linter@text
+  \else\ifx\rintertext#1
+    \let\@next\rinter@text
+  \else\ifx\\#1
+    \addto@DPbody{\DPh@@kr&\DP@rint}\@xp\addto@DPbody\@xp{\@xp{\the\DP@lign@no}&\\}\DP@crtrue
+    \global\advance\DP@lign@no\@ne
+    \let\@next\parse@cr
+  \else\check@braces#1!Q!Q!Q!\ifbr@ce\addto@DPbody{{#1}}\else
+    \addto@DPbody{#1}\fi
+    \let\@next\parseb@dy
+  \fi\fi\fi\fi\fi\fi\fi\fi\@next}
+\def\process@DPb@dy{\let\lintertext\@gobble\let\rintertext\@gobble
+  \@xp\start@align\@xp\tw@\@xp\st@rredtrue\@xp\m@ne\the\DP@lignb@dy}
+\def\linter@text#1{\@xp\DPlint\@xp{\the\DP@lign@no}{#1}\parseb@dy}
+\def\rinter@text#1{\@xp\DPrint\@xp{\the\DP@lign@no}{#1}\parseb@dy}
+\def\DPlint#1#2{\@xp\def\csname DP@lint:#1\endcsname{\text{#2}}}
+\def\DPrint#1#2{\@xp\def\csname DP@rint:#1\endcsname{\text{#2}}}
+\def\DP@lint#1{\ifbalancedlrint\@xp\ifx\csname
+DP@lint:#1\endcsname\relax\phantom
+  {\csname DP@rint:#1\endcsname}\else\csname DP@lint:#1\endcsname\fi
+  \else\csname DP@lint:#1\endcsname\fi}
+\def\DP@rint#1{\ifbalancedlrint\@xp\ifx\csname
+DP@rint:#1\endcsname\relax\phantom
+  {\csname DP@lint:#1\endcsname}\else\csname DP@rint:#1\endcsname\fi
+  \else\csname DP@rint:#1\endcsname\fi}
+\def\eat@command#1#2{\ifcase#1\addto@DPbody{\intertext{#2}}\or
+  \addto@DPbody{\shortintertext{#2}}\fi\DP@crtrue
+  \global\advance\DP@lign@no\@ne\parseb@dy}
+\def\parse@cr{\new@ifnextchar*{\parse@crst}{\parse@crst{}}}
+\def\parse@crst#1{\addto@DPbody{#1}\new@ifnextchar[{\parse@crb}{\parseb@dy}}
+\def\parse@crb[#1]{\addto@DPbody{[#1]}\parseb@dy}
+\def\check@braces#1#2!Q!Q!Q!{\def\dp@lignt@stm@cro{#2}\ifx
+  \empty\dp@lignt@stm@cro\br@cefalse\else\br@cetrue\fi}
+\def\eat@environment#1{\addto@DPbody{\begin{#1}}\begingroup
+  \def\@currenvir{#1}\let\@next\digest@env\@next}
+\def\digest@env#1\end#2{%
+  \edef\begin@stack{\push@begins#1\begin\end \@xp\@gobble\begin@stack}%
+  \ifx\@empty\begin@stack
+    \@checkend{#2}
+    \endgroup\let\@next\parseb@dy\fi
+    \addto@DPbody{#1\end{#2}}
+    \@next}
+\def\lintertext{lint}\def\rintertext{rint}
+\newif\ifbalancedlrint
+\let\DPh@@kl\empty\let\DPh@@kr\empty
+\def\DPg@therl{&\omit\hfil$\displaystyle}
+\def\DPg@therr{$\hfil}
+
+\newenvironment{DPalign*}[1][a]{%
+  \if m#1\balancedlrintfalse\else\balancedlrinttrue\fi
+  \global\DP@lign@no\z@\DP@crfalse
+  \DP@lignb@dy{&\DP@lint0&}\parseb@dy
+}{%
+  \endalign
+}
+\newenvironment{DPgather*}[1][a]{%
+  \if m#1\balancedlrintfalse\else\balancedlrinttrue\fi
+  \global\DP@lign@no\z@\DP@crfalse
+  \let\DPh@@kl\DPg@therl
+  \let\DPh@@kr\DPg@therr
+  \DP@lignb@dy{&\DP@lint0&\DPh@@kl}\parseb@dy
+}{%
+  \endalign
+}
+
+\endinput

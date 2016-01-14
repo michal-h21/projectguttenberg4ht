@@ -1,0 +1,85 @@
+\NewConfigure{TNote}{2}
+
+\renewcommand\TNote[1]{
+  \refstepcounter{mytnote}%
+  \a:TNote
+    \subsection*{\MakeLowercase{\TransNote}}%
+    \raggedright
+    #1
+  \b:TNote
+}
+
+\def\stoppar{\ifvmode\IgnorePar\fi\EndP}
+
+\Configure{TNote}{\stoppar\HCode{<div class="tnote">}}{\stoppar\HCode{</div>}}
+\Css{.tnote{width:85\%;border-top:1px solid black;border-bottom:1px solid black;}}
+
+
+\newcommand\SetOddHead[1]{}
+\renewcommand\pdfbookmark[3][]{}
+\renewcommand{\flushpage}{\clearpage}
+\renewcommand\Chapter[3][]{\chapter{#3}}
+\renewcommand\AltChapter[2][]{\chapter*{#2}}
+\renewcommand\ChapterStar[2][]{\chapter*{#2}}
+\renewcommand\Section[2][]{\section{#2}}
+\renewcommand\Note[1]{\section*{#1}}
+
+\renewenvironment{DPalign*}[1][a]{\align*
+  % \global\DP@lign@no\z@\DP@crfalse
+  % \DP@lignb@dy{&\DP@lint0&}\parseb@dy
+}{\endalign*}
+\renewenvironment{DPgather*}[1][a]{\gather*}{\endgather*}
+
+\renewenvironment{Answers}[4][1]{%
+  \ifthenelse{\not\equal{#2}{I}}{\vspace{12pt plus 24pt minus 12pt}\tb#4}{}%
+%
+  \section*{Exercises~#2.\quadt#3}\label{AnsEx:#2}%
+  \begin{list}{}{\ListInitAns}%
+    \ifthenelse{\equal{#1}{1}}{%
+      \setboolean{InMulticols}{false}% Update state; else
+    }{%
+      \setboolean{InMulticols}{true}%
+      \begin{multicols}{#1}[\raggedcolumns]%
+      }%
+    }{% End of envt code
+      \ifthenelse{\boolean{InMulticols}}{\end{multicols}}{}%
+  \end{list}%
+  \setboolean{InMulticols}{false}%
+}
+
+\renewenvironment{Problems}[1][]{%
+  \list{problems}{\ListInit}%
+  }{% End of envt code
+\endlist%
+}
+
+\renewcommand{\ResetCols}[1]{%
+}{}
+
+\renewcommand\Item[2][]{%
+  \ifvmode\leavevmode\fi\item #2%
+   \ifthenelse{\not\equal{#1}{}}{\phantomsection\label{#1}}{}%
+}
+\renewcommand{\Graphic}[2][]{%
+  \ifthenelse{\equal{#1}{}}{%
+    \includegraphics{./images/#2}%
+  }{%
+    \includegraphics[width=#1]{./images/#2}%
+  }%
+}
+
+
+\DeclareGraphicsExtensions{.svg,.png,.eps}
+\DeclareGraphicsRule{.svg}{bmp}{.xbb}{}
+ 
+  \newcommand\emwidth{10}
+  %\let\emwidth\f@size  %  DO NOT USE THIS LINE, causes problems
+  % convert pt to rem
+  \newcommand\CalcRem[1]{\strip@pt\dimexpr(#1)/\emwidth}
+    \Configure{graphics*}
+           {svg}
+            {\Picture[pict]{\csname Gin@base\endcsname.svg
+            \space style="width:\CalcRem{\Gin@req@width}em;"
+            }%
+            \special{t4ht+@File: \csname Gin@base\endcsname.svg}
+           }
